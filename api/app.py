@@ -92,7 +92,8 @@ def add_paciente(form: PacienteSchema):
         print(type(e))
         return {"message": error_msg}, 400
 
-@app.get('/all_pacientes',tags=[paciente_tag])
+@app.get('/all_pacientes',tags=[paciente_tag],
+         responses={"200":PacienteListViewSchema,"400":ErrorSchema, "404":ErrorSchema})
 def get_all_pacientes():
     """Retorna todos os pacientes cadastrados no banco
     """
@@ -113,7 +114,8 @@ def get_all_pacientes():
         print(e.__str__())
         return {"message": error_msg}, 400
 
-@app.get('/paciente',tags=[paciente_tag])
+@app.get('/paciente',tags=[paciente_tag],
+         responses={"200":PacienteViewSchema,"400":ErrorSchema, "404":ErrorSchema})
 def get_paciente(query: PacienteBuscaIDSchema):
     """Retorna um paciente com base no seu ID
     """
@@ -134,7 +136,8 @@ def get_paciente(query: PacienteBuscaIDSchema):
         error_msg = "Não foi possível realizar a consulta de Pacientes"
         return {"message": error_msg}, 400
 
-@app.get('/pacientes',tags=[paciente_tag])
+@app.get('/pacientes',tags=[paciente_tag],
+         responses={"200":PacienteListViewSchema,"400":ErrorSchema, "404":ErrorSchema})
 def get_pacientes(query: PacienteBuscaParameterSchema):
     """Retorna Pacientes com base em um parametro (id, nome, sexo, data_nasc, queixa_principal, uf ou cidade) e o valor de busca
     """
@@ -174,7 +177,8 @@ def get_pacientes(query: PacienteBuscaParameterSchema):
         print(e)
         return {"message": error_msg}, 400
     
-@app.delete('/delete_paciente',tags=[paciente_tag])
+@app.delete('/delete_paciente',tags=[paciente_tag],
+            responses={"200":PacienteViewSchema,"400":ErrorSchema, "404":ErrorSchema})
 def delete_paciente(form: PacienteBuscaIDSchema):
     """Rota para deletar paciente com base no seu ID
     """
@@ -232,7 +236,8 @@ def delete_paciente(form: PacienteBuscaIDSchema):
         error_msg = "Não foi possível realizar a deleção do Paciente"
         return {"message": error_msg}, 400
 
-@app.put('/change_complaint', tags=[paciente_tag])
+@app.put('/change_complaint', tags=[paciente_tag],
+         responses={"200":PacienteViewSchema,"400":ErrorSchema, "404":ErrorSchema})
 def change_complaint(form: PacienteAlteraQueixaSchema):
     """Rota para alterar a queixa principal do paciente
     """
