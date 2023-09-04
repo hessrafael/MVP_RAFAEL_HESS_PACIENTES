@@ -11,6 +11,7 @@ class PacienteSchema(BaseModel):
     sexo: str = 'M'
     data_nascimento: str = 'dd/mm/aaaa'
     queixa_principal: str = 'A queixa principal do paciente'
+    cep: str = '90470230'
 
 class PacienteViewSchema(BaseModel):
     """ Define como um Paciente deve ser retornado
@@ -20,6 +21,8 @@ class PacienteViewSchema(BaseModel):
     sexo: SexOptions = 'MALE'
     data_nascimento: str = 'dd/mm/aaaa'    
     queixa_principal: str = 'A queixa principal do paciente'
+    uf: str = 'SP'
+    cidade: str = 'São Paulo'
 
 class PacienteListViewSchema(BaseModel):
     """Define como uma Lista de Paciente deve ser retornada
@@ -45,7 +48,9 @@ def apresenta_paciente(paciente: Paciente):
         "nome": paciente.name,
         "sexo": paciente.sex.__str__(),
         "data_nascimento": paciente.birthdate,
-        "queixa_principal": paciente.main_complaint
+        "queixa_principal": paciente.main_complaint,
+        "UF": paciente.uf,
+        "Cidade": paciente.city
     }
 
 def apresenta_pacientes(pacientes: List[Paciente]):

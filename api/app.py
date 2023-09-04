@@ -27,7 +27,8 @@ def home():
     """
     return redirect('/openapi')
 
-@app.post('/paciente',tags=[paciente_tag])
+@app.post('/paciente',tags=[paciente_tag],
+          responses={"200":PacienteViewSchema,"400":ErrorSchema, "409":ErrorSchema})
 def add_paciente(form: PacienteSchema):
     """Adiciona um novo paciente à base
     """
@@ -37,13 +38,34 @@ def add_paciente(form: PacienteSchema):
     except:
         error_msg = "Valor inválido para data. Insira uma data no formato dd/mm/aaaa"
         return {"message": error_msg}, 400
+    
+    try:
+        response = requests.get(f'https://viacep.com.br/ws/{form.cep}/json/')
+    except Exception as e:
+        error_msg = "Sistema de consulta CEP inacessível"
+        return {"message": error_msg}, 400
+    
+    
+    if response.status_code != 200:
+        error_msg = "Valor inválido para o CEP. Insira apenas números"
+        return {"message": error_msg}, 400
+    else:
+        response = response.json()
+        if 'uf' in response:
+            uf = response['uf']
+            city = response['localidade']
+        else:
+            error_msg = "CEP não encontrado na base de dados"
+            return {"message": error_msg}, 400
 
     try:
         paciente = Paciente(
             name=form.nome,
             sex= SexOptions(form.sexo),
             birthdate=parsed_birthdate,
-            main_complaint=form.queixa_principal
+            main_complaint=form.queixa_principal,
+            uf=uf,
+            city=city
         )
     except:
         error_msg = "Valores inválidos de parametros para nova instância de Paciente"
@@ -114,7 +136,7 @@ def get_paciente(query: PacienteBuscaIDSchema):
 
 @app.get('/pacientes',tags=[paciente_tag])
 def get_pacientes(query: PacienteBuscaParameterSchema):
-    """Retorna Pacientes com base em um parametro (id, nome, sexo, data_nasc, queixa_principal) e o valor de busca
+    """Retorna Pacientes com base em um parametro (id, nome, sexo, data_nasc, queixa_principal, uf ou cidade) e o valor de busca
     """
     try:
         # criando conexão com o banco
@@ -133,6 +155,10 @@ def get_pacientes(query: PacienteBuscaParameterSchema):
             pacientes = session.query(Paciente).filter(Paciente.is_active == True, Paciente.sex == SexOptions(query_param)).all()
         elif PacienteParams(query.searched_param) == PacienteParams.QUEIXA_PRINCIPAL:
             pacientes = session.query(Paciente).filter(Paciente.is_active == True, Paciente.main_complaint.ilike(f"%{query.param}%")).all()
+        elif PacienteParams(query.searched_param) == PacienteParams.UF:
+            pacientes = session.query(Paciente).filter(Paciente.is_active == True, Paciente.uf == query_param.upper()).all()
+        elif PacienteParams(query.searched_param) == PacienteParams.CIDADE:
+            pacientes = session.query(Paciente).filter(Paciente.is_active == True, Paciente.city == query_param.title()).all()
         else:
             error_msg = 'Parametro inválido para pesquisa'
             return {"message":error_msg}, 400
@@ -163,18 +189,29 @@ def delete_paciente(form: PacienteBuscaIDSchema):
             return {"message": error_msg},404
         else:
             #busca os procedimentos do paciente
-            response = requests.get(f'http://127.0.0.1:5002/procedimentos_paciente?id={form.id}')
+            try:
+                response = requests.get(f'http://127.0.0.1:5002/procedimentos_paciente?id={form.id}')
+            except Exception as e:
+                error_msg = "Consulta aos procedimentos inacessível"
+                return {"message": error_msg}, 400
 
             if response.status_code == 404:
                 #Não há procedimento associado, pode seguir com a deleção do paciente
                 paciente.is_active = False
             
             elif response.status_code == 200:
+                
                 #desativa os procedimentos do paciente (outro servico cuida da lógica)
                 procedimentos = response.json().get("procedimentos")
                 headers = {'Content-Type': 'application/json'}
                 payload = {'ids': [{'id': procedimento['id']} for procedimento in procedimentos]}
-                response = requests.delete('http://127.0.0.1:5002/delete_procedimentos',data=json.dumps(payload),headers=headers)
+                
+                try:
+                    response = requests.delete('http://127.0.0.1:5002/delete_procedimentos',data=json.dumps(payload),headers=headers)
+                except Exception as e:
+                    error_msg = "Serviço de deleção dos procedimentos inacessível"
+                    return {"message": error_msg}, 400
+                
                 if response.status_code != 200:
                     error_msg = "Não foi possível realizar a deleção do Paciente por causa dos procedimentos associados"
                     return {"message": error_msg}, 400

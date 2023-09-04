@@ -11,6 +11,8 @@ class PacienteParams(enum.Enum):
     DATA_NASC = 'data_nasc'
     SEXO = 'sexo'
     QUEIXA_PRINCIPAL = 'queixa_principal'
+    UF = 'uf'
+    CIDADE = 'cidade'
 
 class SexOptions(enum.Enum):
     MASCULINO = 'M'
@@ -26,13 +28,17 @@ class Paciente(Base):
     sex = Column(Enum(SexOptions))
     birthdate = Column(DateTime)
     main_complaint = Column(String(280))
+    uf = Column(String(2))
+    city = Column(String(50))
 
     created_at = Column(DateTime, default=datetime.now())
     is_active = Column(Boolean, default=True)
 
-    def __init__(self,name: String,sex:SexOptions,birthdate:datetime,main_complaint: String):
+    def __init__(self,name: String,sex:SexOptions,birthdate:datetime,main_complaint: String, uf: String, city: String):
         self.pacient_id = uuid.uuid4().__str__()
         self.name = name
         self.sex = sex
         self.birthdate = birthdate
         self.main_complaint = main_complaint
+        self.uf = uf
+        self.city = city
