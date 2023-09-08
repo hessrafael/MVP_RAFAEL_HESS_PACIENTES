@@ -50,7 +50,7 @@ def apresenta_paciente(paciente: Paciente):
         "data_nascimento": paciente.birthdate,
         "queixa_principal": paciente.main_complaint,
         "UF": paciente.uf,
-        "Cidade": paciente.city
+        "cidade": paciente.city
     }
 
 def apresenta_pacientes(pacientes: List[Paciente]):
