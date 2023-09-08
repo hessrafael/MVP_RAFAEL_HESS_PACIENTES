@@ -3,6 +3,9 @@
 Este projeto python (v.3.10.6) é para um sistema de gestão de pacientes em um hospital. Ele deve ser usado em conjuntos com os seguintes sistemas localizados em https://github.com/hessrafael/MVP_RAFAEL_HESS_PROCEDIMENTOS e https://github.com/hessrafael/MVP_RAFAEL_HESS_MEDICAMENTOS
 
 ---
+Como parte do requisito do projeto, essa API faz uso de API externa [VIACEP](https://viacep.com.br/) para encontrar a localidade e UF do paciente com base em seu CEP. O seu uso é gratuito e não necessita realização de cadastro nem obtenção de token. É utilizada a rota GET 'https://viacep.com.br/ws/seu_cep_aqui/json/', obtendo dados do endereço do paciente, quando CEP válido, ou o valor "erro" quando CEP inexistente mas no formato válido, ou um erro 404 se CEP no formato inválido.
+
+---
 ## Executando com o Docker
 
 Certifique-se de ter o [Docker](https://docs.docker.com/engine/install/) instalado e em execução em sua máquina.
