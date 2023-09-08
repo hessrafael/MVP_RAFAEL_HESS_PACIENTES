@@ -88,8 +88,6 @@ def add_paciente(form: PacienteSchema):
     except Exception as e:
         # caso um erro fora do previsto
         error_msg = "Não foi possível salvar novo paciente :/"
-        print(e.__str__())
-        print(type(e))
         return {"message": error_msg}, 400
 
 @app.get('/all_pacientes',tags=[paciente_tag],
@@ -111,7 +109,6 @@ def get_all_pacientes():
             return apresenta_pacientes(pacientes), 200
     except Exception as e:
         error_msg = "Não foi possível realizar a consulta de Pacientes"
-        print(e.__str__())
         return {"message": error_msg}, 400
 
 @app.get('/paciente',tags=[paciente_tag],
@@ -132,7 +129,6 @@ def get_paciente(query: PacienteBuscaIDSchema):
             #retorna o paciente
             return apresenta_paciente(paciente), 200
     except Exception as e:
-        print(e.__str__())
         error_msg = "Não foi possível realizar a consulta de Pacientes"
         return {"message": error_msg}, 400
 
@@ -146,7 +142,6 @@ def get_pacientes(query: PacienteBuscaParameterSchema):
         session = Session()
         # buscando todas as instâncias ativas conforme o param
         query_param = query.param
-        print(query.searched_param)
         if PacienteParams(query.searched_param) == PacienteParams.ID:
             pacientes = session.query(Paciente).filter(Paciente.is_active == True, Paciente.pacient_id == query_param).all()
         elif PacienteParams(query.searched_param) == PacienteParams.NOME:
@@ -174,7 +169,6 @@ def get_pacientes(query: PacienteBuscaParameterSchema):
             return apresenta_pacientes(pacientes), 200
     except Exception as e:
         error_msg = "Não foi possível realizar a consulta de Pacientes"
-        print(e)
         return {"message": error_msg}, 400
     
 @app.delete('/delete_paciente',tags=[paciente_tag],
@@ -232,7 +226,6 @@ def delete_paciente(form: PacienteBuscaIDSchema):
         return apresenta_paciente(paciente)
     
     except Exception as e:
-        print(e.__str__())
         error_msg = "Não foi possível realizar a deleção do Paciente"
         return {"message": error_msg}, 400
 
@@ -257,6 +250,5 @@ def change_complaint(form: PacienteAlteraQueixaSchema):
         return apresenta_paciente(paciente)
     
     except Exception as e:
-        print(e.__str__())
         error_msg = "Não foi possível realizar a alteração do Paciente"
         return {"message": error_msg}, 400
