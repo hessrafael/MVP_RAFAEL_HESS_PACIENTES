@@ -11,6 +11,7 @@ from models import Session, Paciente, PacienteParams
 from schemas import *
 from flask_cors import CORS
 import datetime
+import os
 
 info = Info(title="API gestão de Pacientes", version="1.0.0")
 app = OpenAPI(__name__, info=info)
@@ -19,6 +20,12 @@ CORS(app)
 # definindo tags
 home_tag = Tag(name="Documentação", description="Seleção de documentação: Swagger, Redoc ou RapiDoc")
 paciente_tag = Tag(name="Paciente", description="Adição, visualização e remoção de Pacientes à base")
+
+# definindo o host conforme o tipo de execução
+if os.getenv("DOCKER_ENV") == "true":
+    HOST = 'proc-cont'
+else:
+    HOST = '127.0.0.1'
 
 
 @app.get('/', tags=[home_tag])
@@ -188,7 +195,7 @@ def delete_paciente(form: PacienteBuscaIDSchema):
         else:
             #busca os procedimentos do paciente
             try:
-                response = requests.get(f'http://127.0.0.1:5002/procedimentos_paciente?id={form.id}')
+                response = requests.get(f'http://{HOST}:5002/procedimentos_paciente?id={form.id}')
             except Exception as e:
                 error_msg = "Consulta aos procedimentos inacessível"
                 return {"message": error_msg}, 400
@@ -205,7 +212,7 @@ def delete_paciente(form: PacienteBuscaIDSchema):
                 payload = {'ids': [{'id': procedimento['id']} for procedimento in procedimentos]}
                 
                 try:
-                    response = requests.delete('http://127.0.0.1:5002/delete_procedimentos',data=json.dumps(payload),headers=headers)
+                    response = requests.delete(f'http://{HOST}:5002/delete_procedimentos',data=json.dumps(payload),headers=headers)
                 except Exception as e:
                     error_msg = "Serviço de deleção dos procedimentos inacessível"
                     return {"message": error_msg}, 400

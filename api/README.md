@@ -17,10 +17,16 @@ Execute **como administrador** o seguinte comando para construir a imagem Docker
 $ docker build -t pacient_api .
 ```
 
+Para comunicação entre os microsserviços associados, cria-se uma rede comum entre eles, executando (caso ainda não tenha criado), **como administrador**, o seguinte comando:
+
+```
+$ docker network create --driver=bridge med-net
+```
+
 Uma vez criada a imagem, para executar o container basta executar, **como administrador**, seguinte o comando:
 
 ```
-$ docker run -p 5000:5000 pacient_api
+$ docker run -d --name=pac-cont --net=med-net -p 5000:5000 pacient_api
 ```
 
 Uma vez executando, para acessar a API, basta abrir o [http://localhost:5000/#/](http://localhost:5000/#/) no navegador.
